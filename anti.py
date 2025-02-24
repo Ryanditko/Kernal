@@ -28,10 +28,7 @@ if delete_response.status_code == 204:
     print("Cargo excluído com sucesso!")
 else:
     print(f"Erro ao excluir o cargo: {delete_response.text}")
-
-
-# Após o código existente, adicione:
-
+
 # Tente modificar o cargo
 modify_url = f'https://discord.com/api/v10/guilds/{GUILD_ID}/roles/{ROLE_ID}'
 modify_data = {
@@ -45,9 +42,7 @@ if modify_response.status_code == 200:
     print("Cargo modificado com sucesso!")
     print(modify_response.json())
 else:
-    print(f"Erro ao modificar o cargo: {modify_response.text}")
-
-    # Após o código de modificação, adicione:
+    print(f"Erro ao modificar o cargo: {modify_response.text}")
     
     # Tente criar um novo cargo via 
     create_url = f'https://discord.com/api/v10/guilds/{GUILD_ID}/roles'
