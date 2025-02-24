@@ -70,11 +70,7 @@ else:
         
         print("Lista de todos os cargos:")
         for role in roles:
-            print(f"ID: {role['id']}, Nome: {role['name']}, Gerenciado: {role.get('managed', False)}, Posição: {role['position']}")
-        
-        # Continuação do seu código existente...
-
-        # Após o código existente
+            print(f"ID: {role['id']}, Nome: {role['name']}, Gerenciado: {role.get('managed', False)}, Posição: {role['position']}")
         
         # Tente mover o cargo na hierarquia
         move_url = f'https://discord.com/api/v10/guilds/{GUILD_ID}/roles'
