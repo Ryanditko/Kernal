@@ -28,8 +28,7 @@ if delete_response.status_code == 204:
     print("Cargo excluído com sucesso!")
 else:
     print(f"Erro ao excluir o cargo: {delete_response.text}")
-
-# ... restante do seu código
+
 
 # Após o código existente, adicione:
 
@@ -50,7 +49,7 @@ else:
 
     # Após o código de modificação, adicione:
     
-    # Tente criar um novo cargo
+    # Tente criar um novo cargo via 
     create_url = f'https://discord.com/api/v10/guilds/{GUILD_ID}/roles'
     create_data = {
         "name": "Anti delete",
