@@ -26,7 +26,7 @@ createCommand({
     ],
     async run(interaction) {
         if (!interaction.guild) {
-            await interaction.reply({ content: "❌ This command only works in servers.", ephemeral: true });
+            await interaction.reply({ content: "Este comando funciona apenas em servidores.", ephemeral: true });
             return;
         }
 

@@ -1,5 +1,6 @@
 import { createCommand } from "#base";
-import { ApplicationCommandOptionType, ApplicationCommandType } from "discord.js";
+import { config } from "../../../settings/config.js";
+import { ApplicationCommandOptionType, ApplicationCommandType, EmbedBuilder } from "discord.js";
 
 createCommand({
     name: "ban",
@@ -29,6 +30,17 @@ createCommand({
         }
     ],
     async run(interaction) {
+        // Verificar se é o dono do bot
+        if (interaction.user.id !== config.OWNER_ID) {
+            const errorEmbed = new EmbedBuilder()
+                .setTitle("🚫 Bot em Fase de Teste")
+                .setDescription("Este bot está em fase de testes e restrito ao desenvolvedor.")
+                .setColor(0xFF0000)
+                .setTimestamp();
+            await interaction.reply({ embeds: [errorEmbed], ephemeral: true });
+            return;
+        }
+
         const user = interaction.options.getUser("user", true);
         const reason = interaction.options.getString("reason") || "No reason provided";
         const deleteDays = interaction.options.getInteger("delete_messages") || 0;
