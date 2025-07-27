@@ -1,7 +1,12 @@
 import { createCommand } from "#base";
 import { config } from "../../../settings/config.js";
 import { ApplicationCommandType, ApplicationCommandOptionType, EmbedBuilder, VoiceChannel, GuildMember } from "discord.js";
-import { joinVoiceChannel, createAudioPlayer, createAudioResource, AudioPlayerStatus } from "@discordjs/voice";
+import { 
+    joinVoiceChannel, 
+    createAudioPlayer, 
+    createAudioResource, 
+    AudioPlayerStatus
+} from "@discordjs/voice";
 import { stream, video_basic_info, search } from "play-dl";
 import { createRow } from "@magicyan/discord";
 import { ButtonBuilder, ButtonStyle } from "discord.js";
@@ -29,49 +34,75 @@ const queues = new Map<string, Queue>();
 
 async function getSongInfo(query: string): Promise<Song | null> {
     try {
+        console.log(`🔍 Processando query: ${query}`);
+        
         // Se for uma URL do Spotify, extrair informações e buscar no YouTube
         if (query.includes('spotify.com')) {
+            console.log(`🎵 URL do Spotify detectada, convertendo para busca...`);
             const spotifyQuery = await extractSpotifyInfo(query);
             if (spotifyQuery) {
                 query = spotifyQuery;
+            } else {
+                console.log(`⚠️ Não foi possível converter Spotify, usando busca normal`);
+                // Remover parâmetros da URL para busca mais limpa
+                query = query.split('?')[0].split('/').pop() || query;
             }
         }
         
         // Se for uma URL do YouTube, usar diretamente
         if (query.includes('youtube.com') || query.includes('youtu.be')) {
-            const info = await video_basic_info(query);
-            return {
-                title: info.video_details.title || "Título desconhecido",
-                url: query,
-                duration: formatDuration(info.video_details.durationInSec || 0),
-                thumbnail: info.video_details.thumbnails?.[0]?.url || "",
-                requestedBy: ""
-            };
+            console.log(`▶️ URL do YouTube detectada: ${query}`);
+            
+            try {
+                const info = await video_basic_info(query);
+                console.log(`✅ Informações obtidas: ${info.video_details.title}`);
+                
+                return {
+                    title: info.video_details.title || "Título desconhecido",
+                    url: query,
+                    duration: formatDuration(info.video_details.durationInSec || 0),
+                    thumbnail: info.video_details.thumbnails?.[0]?.url || "",
+                    requestedBy: ""
+                };
+            } catch (ytError) {
+                console.error(`❌ Erro ao obter info do YouTube:`, ytError);
+                return null;
+            }
         }
         
         // Se não for URL, fazer busca no YouTube
-        const searchResults = await search(query, { limit: 1 });
+        console.log(`🔍 Fazendo busca no YouTube por: ${query}`);
+        const searchResults = await search(query, { 
+            limit: 5,
+            source: { youtube: "video" }
+        });
+        
+        console.log(`📋 Resultados encontrados: ${searchResults.length}`);
         
         if (searchResults.length === 0) {
+            console.log(`❌ Nenhum resultado encontrado`);
             return null;
         }
         
-        // Pegar apenas vídeos do YouTube
-        const youtubeResult = searchResults.find((result: any) => result.type === 'video');
+        // Pegar o primeiro resultado válido
+        const youtubeResult = searchResults[0];
         
-        if (!youtubeResult) {
+        if (!youtubeResult || !youtubeResult.url) {
+            console.log(`❌ Resultado inválido`);
             return null;
         }
+        
+        console.log(`✅ Música encontrada: ${youtubeResult.title}`);
         
         return {
-            title: (youtubeResult as any).title || "Título desconhecido",
-            url: (youtubeResult as any).url,
-            duration: formatDuration((youtubeResult as any).durationInSec || 0),
-            thumbnail: (youtubeResult as any).thumbnails?.[0]?.url || "",
+            title: youtubeResult.title || "Título desconhecido",
+            url: youtubeResult.url,
+            duration: formatDuration(youtubeResult.durationInSec || 0),
+            thumbnail: youtubeResult.thumbnails?.[0]?.url || "",
             requestedBy: ""
         };
     } catch (error) {
-        console.error("Erro ao obter informações da música:", error);
+        console.error("❌ Erro ao obter informações da música:", error);
         return null;
     }
 }
@@ -109,6 +140,7 @@ function formatDuration(seconds: number): string {
 async function playNext(queue: Queue) {
     if (queue.songs.length === 0) {
         queue.isPlaying = false;
+        queue.currentSong = undefined;
         return;
     }
 
@@ -117,20 +149,61 @@ async function playNext(queue: Queue) {
     queue.isPlaying = true;
 
     try {
-        const audioStream = await stream(song.url);
-        const resource = createAudioResource(audioStream.stream, {
-            inputType: audioStream.type
+        console.log(`🎵 Tentando tocar: ${song.title}`);
+        console.log(`🔗 URL: ${song.url}`);
+        
+        // Criar stream de áudio com play-dl
+        const audioStream = await stream(song.url, { 
+            quality: 2,
+            seek: 0,
+            htmldata: false
         });
         
+        console.log(`📡 Stream criado com tipo: ${audioStream.type}`);
+        
+        // Criar resource de áudio
+        const resource = createAudioResource(audioStream.stream, {
+            inputType: audioStream.type,
+            inlineVolume: true
+        });
+        
+        // Definir volume se disponível
+        if (resource.volume) {
+            resource.volume.setVolume(queue.volume / 100);
+        }
+        
+        console.log(`🔊 Iniciando reprodução...`);
+        
+        // Tocar o resource
         queue.player.play(resource);
-
-        queue.player.on(AudioPlayerStatus.Idle, () => {
-            playNext(queue);
+        
+        // Remover listeners antigos para evitar duplicatas
+        queue.player.removeAllListeners(AudioPlayerStatus.Idle);
+        queue.player.removeAllListeners(AudioPlayerStatus.Playing);
+        queue.player.removeAllListeners(AudioPlayerStatus.Paused);
+        queue.player.removeAllListeners('error');
+        
+        // Adicionar listeners de evento
+        queue.player.once(AudioPlayerStatus.Playing, () => {
+            console.log(`▶️ Música tocando: ${song.title}`);
+        });
+        
+        queue.player.once(AudioPlayerStatus.Idle, () => {
+            console.log(`⏭️ Música terminou: ${song.title}`);
+            setTimeout(() => playNext(queue), 1000); // Pequeno delay antes da próxima música
+        });
+        
+        queue.player.on('error', (error: any) => {
+            console.error(`❌ Erro no player:`, error);
+            setTimeout(() => playNext(queue), 1000);
         });
 
     } catch (error) {
-        console.error("Erro ao reproduzir música:", error);
-        playNext(queue);
+        console.error(`❌ Erro ao reproduzir música:`, error);
+        console.error(`📋 Detalhes do erro:`, error instanceof Error ? error.message : 'Erro desconhecido');
+        
+        // Tentar próxima música após erro
+        setTimeout(() => playNext(queue), 1000);
     }
 }
 
@@ -215,14 +288,32 @@ createCommand({
                 await interaction.deferReply();
 
                 if (!queue) {
+                    console.log(`🔌 Conectando ao canal de voz: ${voiceChannel.name}`);
+                    
                     const connection = joinVoiceChannel({
                         channelId: voiceChannel.id,
                         guildId: interaction.guildId!,
                         adapterCreator: interaction.guild!.voiceAdapterCreator,
                     });
 
+                    console.log(`🎵 Criando audio player...`);
                     const player = createAudioPlayer();
-                    connection.subscribe(player);
+                    
+                    console.log(`🔗 Conectando player à conexão...`);
+                    const subscription = connection.subscribe(player);
+                    
+                    if (!subscription) {
+                        console.error(`❌ Falha ao conectar player à conexão de voz!`);
+                        await interaction.editReply("❌ Erro ao conectar ao canal de voz!");
+                        return;
+                    }
+                    
+                    console.log(`✅ Player conectado com sucesso!`);
+
+                    // Aguardar conexão estar pronta
+                    connection.on('stateChange', (oldState, newState) => {
+                        console.log(`🔄 Conexão mudou de ${oldState.status} para ${newState.status}`);
+                    });
 
                     queue = {
                         guildId: interaction.guildId!,
@@ -235,14 +326,18 @@ createCommand({
                     };
 
                     queues.set(interaction.guildId!, queue);
+                    console.log(`📋 Queue criada para guild: ${interaction.guildId}`);
                 }
 
+                console.log(`🎵 Obtendo informações da música...`);
                 const songInfo = await getSongInfo(query);
                 if (!songInfo) {
+                    console.log(`❌ Não foi possível obter informações da música`);
                     await interaction.editReply("❌ Não foi possível encontrar essa música!");
                     return;
                 }
 
+                console.log(`✅ Música encontrada: ${songInfo.title}`);
                 songInfo.requestedBy = interaction.user.username;
                 queue.songs.push(songInfo);
 
@@ -282,8 +377,13 @@ createCommand({
                     components: [musicControls]
                 });
 
+                console.log(`📋 Status da queue - Tocando: ${queue.isPlaying}, Músicas na fila: ${queue.songs.length}`);
+                
                 if (!queue.isPlaying) {
-                    playNext(queue);
+                    console.log(`▶️ Iniciando reprodução...`);
+                    await playNext(queue);
+                } else {
+                    console.log(`🎵 Música adicionada à fila, player já tocando`);
                 }
                 break;
 
