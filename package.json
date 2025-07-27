@@ -1,0 +1,57 @@
+{
+  "name": "kernal-bot",
+  "type": "module",
+  "main": "build/index.js",
+  "scripts": {
+    "check": "tsc --noEmit && echo ✔ Ok",
+    "build": "tsc",
+    "dev": "tsx --env-file .env ./src/index.ts",
+    "dev:dev": "tsx --env-file .env.dev ./src/index.ts",
+    "watch": "tsx --watch --env-file .env ./src/index.ts",
+    "watch:dev": "tsx --watch --env-file .env.dev ./src/index.ts",
+    "start": "node --env-file .env .",
+    "start:dev": "node --env-file .env.dev ."
+  },
+  "dependencies": {
+    "@discordjs/voice": "^0.18.0",
+    "@magicyan/discord": "^1.4.11",
+    "@reliverse/reglob": "1.0.0",
+    "chalk": "5.4.1",
+    "discord.js": "14.21.0",
+    "rou3": "0.5.1",
+    "ytdl-core": "^4.11.5",
+    "zod": "4.0.2"
+  },
+  "devDependencies": {
+    "@types/node": "20.17.12",
+    "tsx": "4.19.3",
+    "typescript": "5.7.2"
+  },
+  "imports": {
+    "#database": [
+      "./build/database/index.js"
+    ],
+    "#base": [
+      "./build/discord/base/index.js"
+    ],
+    "#functions": [
+      "./build/functions/index.js"
+    ],
+    "#menus": [
+      "./build/menus/index.js"
+    ],
+    "#settings": [
+      "./build/settings/index.js"
+    ],
+    "#tools": [
+      "./build/tools/index.js"
+    ],
+    "#server": [
+      "./build/server/index.js"
+    ],
+    "#lib": [
+      "./build/lib/index.js"
+    ]
+  },
+  "baseVersion": "1.3.7"
+}

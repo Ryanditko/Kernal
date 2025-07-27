@@ -1,26 +1,23 @@
-# 🤖 KaliBot – Moderador Discord
+# Awesome Bot Base
 
-Bem-vindo ao repositório oficial do **KaliBot**, um bot avançado e **altamente personalizável** desenvolvido para oferecer **moderação silenciosa, automações inteligentes** e um toque de vigilância cibernética nos seus servidores do Discord.
+> [!NOTE] 
+> This project **base** can be generated using the [Constant CLI](https://github.com/rinckodev/constatic)
+> See the full documentation for this base by accessing: https://constatic-docs.vercel.app/docs/discord/start
 
-Inspirado no universo **Kali Linux**. 
+This is the most complete discord bot base you've ever seen! Developed by [@rinckodev](https://github.com/rinckodev), this project uses typescript in an incredible way to provide complete structures and facilitate the development of your discord bot.
 
----
+> [!WARNING]
+> [NodeJs](https://nodejs.org/en) version required: 20.12 or higher
 
-## 🧩 Funcionalidades Principais
+## Scripts
 
-- 🕵️‍♂️ **Moderação Fantasma:** O KaliBot executa comandos como ban, mute, kick, unban, unmute e clear sem exibir mensagens públicas. As ações são discretas e reportadas **apenas ao administrador**.
+- `dev`: running bot in development
+- `build`: build the project
+- `watch`: running in watch mode
+- `start`: running the compiled bot
 
-- 🧠 **Comandos Inteligentes:** Desde automações básicas até integrações avançadas, o bot aprende com os padrões do servidor e antecipa ações.
+## Structures
 
-- 📝 **Logs Privados Diários:** Envio automático dos logs e status do servidor direto no privado do administrador.
-
-- 🔐 **Segurança em Primeiro Lugar:** Criptografia de dados sensíveis e controle de permissões minucioso.
-
----
-
-## ⚙️ Como Rodar Localmente
-
-```bash
-git clone https://github.com/ryanditko/Kali.git
-cd kali
-python ruun kali.py
+- [Commands](https://constatic-docs.vercel.app/docs/discord/commands)
+- [Responder](https://constatic-docs.vercel.app/docs/discord/responders)
+- [Events](https://constatic-docs.vercel.app/docs/discord/events)
