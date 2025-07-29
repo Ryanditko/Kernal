@@ -1,5 +1,5 @@
 import { createCommand } from "#base";
-import { ApplicationCommandType, ApplicationCommandOptionType, EmbedBuilder, ChannelType, PermissionFlagsBits, ButtonBuilder, ButtonStyle, TextChannel } from "discord.js";
+import { ApplicationCommandType, ApplicationCommandOptionType, EmbedBuilder, ChannelType, PermissionFlagsBits, ButtonBuilder, ButtonStyle, TextChannel, ChatInputCommandInteraction } from "discord.js";
 import { createRow } from "@magicyan/discord";
 import { config } from "../../../settings/config.js";
 
@@ -60,7 +60,7 @@ createCommand({
             maxLength: 500
         }
     ],
-    async run(interaction) {
+    async run(interaction: ChatInputCommandInteraction): Promise<void> {
         const action = interaction.options.getString("action", true);
         const categoria = interaction.options.getString("categoria") || "support";
         const razao = interaction.options.getString("razao");
