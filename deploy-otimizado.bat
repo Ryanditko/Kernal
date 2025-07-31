@@ -111,21 +111,4 @@ if exist "kernal-bot-deploy.zip" (
     echo ❌ Erro ao criar ZIP!
 )
 
-echo.
-echo ✅ DEPLOY OTIMIZADO CONCLUIDO!
-echo.
-echo 📋 Proximos passos:
-echo 1. Vá para https://discloud.app
-echo 2. Faca login na sua conta
-echo 3. Va para Dashboard → Upload App
-echo 4. Selecione o arquivo 'kernal-bot-deploy.zip'
-echo 5. Faca upload na Discloud
-echo.
-echo 🎯 OTIMIZACOES APLICADAS:
-echo - Removido node_modules desnecessarios
-echo - Instaladas apenas dependencias de producao
-echo - Removidos arquivos de desenvolvimento
-echo - Mantidas apenas pastas essenciais
-echo.
-
 pause
