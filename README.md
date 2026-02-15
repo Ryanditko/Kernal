@@ -69,13 +69,13 @@ Você pode fazer **TUDO** que um administrador Discord consegue:
 - Configurar servidor e controlar bots
 - Acessar logs e análises detalhadas
 
-### **Segurança Máxima**
+### **Segurança**
 - **ID único protegido** - Apenas você tem acesso
 - **Verificação em cada comando** - Segurança em todas as camadas
 - **Logs completos** - Rastreamento de todas as ações
 ---
 
-## **TECNOLOGIAS UTILIZADAS**
+## **Stacks**
 
 - **Discord.js 14.21.0** - Framework
 - **TypeScript** - Tipagem segura e robusta
