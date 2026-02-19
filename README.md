@@ -1,5 +1,9 @@
 # KERNAL
 
+<p align="center">
+  <img src="https://i.imgur.com/tp2ssuy.jpeg" alt="Ditko Wallpaper" width="800">
+</p>
+
 A professional, high-performance Discord administration and moderation framework. KERNAL provides a comprehensive suite of tools for server management, powered by advanced automation and Artificial Intelligence.
 
 ---
