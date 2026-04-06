@@ -1,11 +1,6 @@
 import { createCommand } from "#base";
 import { config } from "../../../settings/config.js";
 import { ApplicationCommandType, ApplicationCommandOptionType, EmbedBuilder } from "discord.js";
-import OpenAI from "openai";
-
-const openai = new OpenAI({
-    apiKey: config.OPENAI_KEY,
-});
 
 // Configurações de auto-moderação por servidor
 const autoModerationConfig = new Map();
@@ -179,56 +174,20 @@ createCommand({
 });
 
 async function analyzeMessage(message: string) {
-    try {
-        const response = await openai.chat.completions.create({
-            model: "gpt-4",
-            messages: [
-                {
-                    role: "system",
-                    content: `Você é um moderador de Discord expert. Analise a mensagem e determine se ela viola as regras. 
-                    
-                    Categorias para detectar:
-                    - spam: mensagens repetitivas ou promocionais
-                    - toxicity: insultos, ataques pessoais
-                    - nsfw: conteúdo sexual ou inapropriado
-                    - hate: discurso de ódio, preconceito
-                    - threats: ameaças ou violência
-                    
-                    Responda APENAS em formato JSON:
-                    {
-                        "flagged": boolean,
-                        "confidence": number (0-1),
-                        "category": string,
-                        "action": string,
-                        "reason": string
-                    }`
-                },
-                {
-                    role: "user",
-                    content: message
-                }
-            ],
-            temperature: 0.1,
-            max_tokens: 200
-        });
-
-        const result = JSON.parse(response.choices[0]?.message?.content || "{}");
-        return {
-            flagged: result.flagged || false,
-            confidence: result.confidence || 0,
-            category: result.category || "none",
-            action: result.action || "Nenhuma ação necessária",
-            reason: result.reason || ""
-        };
-    } catch (error) {
-        return {
-            flagged: false,
-            confidence: 0,
-            category: "error",
-            action: "Erro na análise",
-            reason: "Falha na comunicação com IA"
-        };
-    }
+    // Simple content analysis without AI
+    const spamPatterns = /(.)\1{4,}|spam|promo|clique aqui|só/gi;
+    const toxicPatterns = /burro|idiot|stupid|hate|kill/gi;
+    
+    const isSpam = spamPatterns.test(message);
+    const isToxic = toxicPatterns.test(message);
+    
+    return {
+        flagged: isSpam || isToxic,
+        confidence: (isSpam || isToxic) ? 0.7 : 0,
+        category: isSpam ? "spam" : isToxic ? "toxic" : "none",
+        action: isSpam ? "delete" : isToxic ? "warn" : "none",
+        reason: isSpam ? "Detectado spam" : isToxic ? "Conteúdo tóxico detectado" : ""
+    };
 }
 
 // Exportar função para uso em eventos
